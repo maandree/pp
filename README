@@ -42,8 +42,9 @@ COMMANDS
 
 RATIONALE
 	This is useful when reading books, RFC:s, or any other
-	text file with page breaks.
+	text file with page breaks, or for simple presentations
+	that does not have any images.
 
 SEE ALSO
-	cat(1), pg(1), less(1), more(1)
+	cat(1), pg(1), less(1), more(1), sent(1)
 
