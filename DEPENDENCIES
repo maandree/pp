@@ -1,0 +1,20 @@
+RUNTIME DEPENDENCIES
+
+	libc
+
+
+BUILD DEPENDENCIES
+
+	libc
+	c99
+	make
+	coreutils
+	texinfo (optional)
+	auto-auto-complete, sed (optional)
+
+
+INSTALL DEPENDENCIES
+
+	make
+	coreutils
+
