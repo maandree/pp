@@ -1,0 +1,11 @@
+(pp
+	(unargumented  (options -e)  (complete -e)
+	(desc 'Display empty pages'))
+
+	(unargumented  (options -b)  (complete -b)
+	(desc 'Display progress bar'))
+
+	(unargumented  (options -p)  (complete -p)
+	(desc 'Display page number and page count'))
+)
+
