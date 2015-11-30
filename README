@@ -5,7 +5,7 @@ SYNOPSIS
 	pp [--] [FILE]
 
 DESCRIPTION
-	Displays an plain-text file page-by-page. It assumes
+	Displays a plain-text file page-by-page. It assumes
 	that the file includes page breaks. If the file does
 	not include page breaks the entire file will be printed
 	to the terminal and the program will exit. If the
