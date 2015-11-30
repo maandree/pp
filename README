@@ -1,0 +1,49 @@
+NAME
+	pp - page pager
+
+SYNOPSIS
+	pp [--] [FILE]
+
+DESCRIPTION
+	Displays an plain-text file page-by-page. It assumes
+	that the file includes page breaks. If the file does
+	not include page breaks the entire file will be printed
+	to the terminal and the program will exit. If the
+	file only includes one page, the the entire page will
+	be printed to the terminal and the program will exit.
+
+	Escape sequences are printed as-is. This means for
+	example that colour can be used in the file, but if
+	the colours span over page breaks, you would best
+	pass it through a preprocessor first that files this.
+	Or better yet; fix the file.
+
+	If no file is specified, or if '-' i specified, stdin
+	will be paged.
+
+COMMANDS
+	n
+	down
+	page down
+	right
+		Display next page.
+
+	p
+	up
+	page up
+	left
+		Display previous page.
+
+	C-l
+		Redraw screen.
+
+	q
+		Exit.
+
+RATIONALE
+	This is useful when reading books, RFC, or any other
+	text file with page breaks.
+
+SEE ALSO
+	cat(1), pg(1), less(1), more(1)
+
