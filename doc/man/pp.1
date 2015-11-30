@@ -3,7 +3,7 @@
 pp - page pager
 .SH SYNOPSIS
 .B pp
-[\-\-]
+.RI [ OPTION ]...\ [\-\-]
 .RI [ FILE ]
 .SH DESCRIPTION
 Displays a plain-text file page-by-page. It assumes
@@ -21,6 +21,17 @@ Or better yet; fix the file.
 .PP
 If no file is specified, or if \- i specified,
 stdin will be paged.
+.SH OPTIONS
+.TP
+\-e
+Display empty pages. The final page will ways be
+omitted if it is empty.
+.TP
+\-b
+Display progress bar.
+.TP
+\-p
+Display page number and page count.
 .SH COMMANDS
 .TP
 n, down, page down, or right

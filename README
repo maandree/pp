@@ -2,7 +2,7 @@ NAME
 	pp - page pager
 
 SYNOPSIS
-	pp [--] [FILE]
+	pp [OPTION]... [--] [FILE]
 
 DESCRIPTION
 	Displays a plain-text file page-by-page. It assumes
@@ -20,6 +20,17 @@ DESCRIPTION
 
 	If no file is specified, or if '-' i specified, stdin
 	will be paged.
+
+OPTIONS
+	-e
+		Display empty pages. The final page will ways
+		be omitted if it is empty.
+
+	-b
+		Display progress bar.
+
+	-p
+		Display page number and page count.
 
 COMMANDS
 	n
