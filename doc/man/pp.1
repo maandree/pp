@@ -1,0 +1,52 @@
+.TH PP 1 PP
+.SH NAME
+pp - page pager
+.SH SYNOPSIS
+.B pp
+[\-\-]
+.RI [ FILE ]
+.SH DESCRIPTION
+Displays an plain-text file page-by-page. It assumes
+that the file includes page breaks. If the file does
+not include page breaks the entire file will be printed
+to the terminal and the program will exit. If the
+file only includes one page, the the entire page will
+be printed to the terminal and the program will exit.
+.PP
+Escape sequences are printed as-is. This means for
+example that colour can be used in the file, but if
+the colours span over page breaks, you would best
+pass it through a preprocessor first that files this.
+Or better yet; fix the file.
+.PP
+If no file is specified, or if \- i specified,
+stdin will be paged.
+.SH COMMANDS
+.TP
+n, down, page down, or right
+Display next page.
+.TP
+p, up, page up, or left
+Display previous page.
+.TP
+C\-l
+Redraw screen.
+.TP
+q
+Exit.
+.SH RATIONALE
+This is useful when reading books, RFC:s, or any other
+text file with page breaks.
+.SH SEE ALSO
+.BR cat (1),
+.BR pg (1),
+.BR less (1),
+.BR more (1)
+.SH AUTHORS
+Principal author, Mattias Andrée.  See the LICENSE file for the full
+list of authors.
+.SH LICENSE
+MIT/X Consortium License.
+.SH BUGS
+Please report bugs to https://github.com/maandree/bus/issues or to
+maandree@member.fsf.org
