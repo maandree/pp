@@ -163,7 +163,7 @@ static int display_page(int bar, int page)
 		t (fprintf(stdout, "\033[%zu;%zuH\033[0m%zu (%zu)",
 		           height, width - 1 - (size_t)n, current_page + 1, page_count) < 0);
 	}
-	else if (bar && page && current_page) {
+	if (bar && page && current_page) {
 		char buffer[2 * 3 * sizeof(size_t) + sizeof(" ()\033[27m")];
 		sprintf(buffer, "%zu (%zu)", current_page + 1, page_count);
 		if (width - 1 - (size_t)n < stop)
@@ -172,7 +172,7 @@ static int display_page(int bar, int page)
 			stop -= width - 1 - (size_t)n;
 		if (stop > (size_t)n)
 			stop = (size_t)n;
-		memmove(buffer + stop + sizeof("\033[27m") - 1, buffer + stop, strlen(buffer + stop));
+		memmove(buffer + stop + (sizeof("\033[27m") - 1), buffer + stop, strlen(buffer + stop) + 1);
 		memcpy(buffer + stop, "\033[27m", sizeof("\033[27m") - 1);
 		t (fprintf(stdout, "\033[%zu;%zuH\033[0;7m%s",
 		           height, width - 1 - (size_t)n, buffer) < 0);
