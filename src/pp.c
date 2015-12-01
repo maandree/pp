@@ -290,7 +290,7 @@ static int add_page(char* buffer, size_t length, int keep_empty)
 	pages[page_count].size = length;
 	pages[page_count].content = malloc(length);
 	t (pages[page_count].content == NULL);
-	memcpy(buffer, pages[page_count].content, length);
+	memcpy(pages[page_count].content, buffer, length);
 	page_count++;
 
 	return 0;
