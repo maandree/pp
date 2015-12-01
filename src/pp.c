@@ -136,7 +136,7 @@ static void get_terminal_size(void)
 static int display_page(int bar, int page)
 {
 	ssize_t n;
-	size_t stop;
+	size_t stop = 0;
 	struct page p;
 
 	p = pages[current_page];
@@ -166,7 +166,7 @@ static int display_page(int bar, int page)
 	if (bar && page && current_page) {
 		char buffer[2 * 3 * sizeof(size_t) + sizeof(" ()\033[27m")];
 		sprintf(buffer, "%zu (%zu)", current_page + 1, page_count);
-		if (width - 1 - (size_t)n < stop)
+		if (width - 1 - (size_t)n > stop)
 			stop = 0;
 		else
 			stop -= width - 1 - (size_t)n;
