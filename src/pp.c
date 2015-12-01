@@ -44,7 +44,7 @@ struct page {
 	 * The content to print for display the page.
 	 * It is not NUL terminated.
 	 */
-	char* content;
+	char *content;
 
 	/**
 	 * The number of bytes stored in `.content`.
@@ -143,9 +143,8 @@ static int display_page(int bar, int page)
 	while (p.size) {
 		n = write(STDOUT_FILENO, p.content, p.size);
 		if (n < 0) {
-			if (errno == EINTR)
-				continue;
-			return -1;
+			t (errno != EINTR);
+			continue;
 		}
 		p.content += n;
 		p.size -= (size_t)n;
@@ -267,6 +266,40 @@ fail:
 
 
 /**
+ * Add a page.
+ * 
+ * @param   buffer      The content of the page.
+ * @param   length      The number of bytes in `buffer`
+ * @param   keep_empty  Keep page even if empty?
+ * @return              0 on success, -1 on error.
+ */
+static int add_page(char* buffer, size_t length, int keep_empty)
+{
+	void *new;
+
+	while (length && (buffer[length - 1] == '\n'))
+		length--;
+
+	if (!length && !keep_empty)
+		return 0;
+
+	new = realloc(pages, (page_count + 1) * sizeof(*pages));
+	t (new == NULL);
+	pages = new;
+
+	pages[page_count].size = length;
+	pages[page_count].content = malloc(length);
+	t (pages[page_count].content == NULL);
+	memcpy(buffer, pages[page_count].content, length);
+	page_count++;
+
+	return 0;
+fail:
+	return -1;
+}
+
+
+/**
  * Load pages.
  * 
  * @param   fd          File descriptor for reading the file.
@@ -275,8 +308,50 @@ fail:
  */
 static int load_pages(int fd, int keep_empty)
 {
-	/* TODO */ (void) fd, (void) keep_empty;
+	char *buffer = NULL;
+	void *new;
+	size_t ptr = 0, size = 0;
+	ssize_t n;
+	int saved_errno;
+	char *start;
+	char *end;
+
+	for (;;) {
+		if (ptr == size) {
+			size = size ? (size << 1) : 8096;
+			new = realloc(buffer, size);
+			t (new == NULL);
+			buffer = new;
+		}
+		n = read(fd, buffer + ptr, size - ptr);
+		if (n < 0) {
+			t (errno != EINTR);
+			continue;
+		} else if (n == 0) {
+			break;
+		}
+		for (start = buffer;;) {
+			end = memchr(start, '\f', ptr - (size_t)(start - buffer));
+			if (end == NULL)
+				break;
+			t (add_page(start, (size_t)(end - start), keep_empty));
+			start = end + 1;
+			if ((size_t)(start - buffer) < ptr)
+				start += (*start == '\n');
+		}
+		memmove(buffer, start, ptr -= (size_t)(start - buffer));
+	}
+
+	t (add_page(buffer, ptr, 0));
+
+	free(buffer);
 	return 0;
+
+fail:
+	saved_errno = errno;
+	free(buffer);
+	errno = saved_errno;
+	return -1;
 }
 
 
