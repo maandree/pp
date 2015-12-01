@@ -330,6 +330,7 @@ static int load_pages(int fd, int keep_empty)
 		} else if (n == 0) {
 			break;
 		}
+		ptr += (size_t)n;
 		for (start = buffer;;) {
 			end = memchr(start, '\f', ptr - (size_t)(start - buffer));
 			if (end == NULL)
