@@ -27,7 +27,28 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <termios.h>
+#include <stdlib.h>
 #include <sys/stat.h>
+
+#define  t(...)  do { if (__VA_ARGS__) goto fail; } while (0)
+
+
+
+/**
+ * The content of a page.
+ */
+struct page {
+	/**
+	 * The content to print for display the page.
+	 * It is not NUL terminated.
+	 */
+	char* content;
+
+	/**
+	 * The number of bytes stored in `.content`.
+	 */
+	size_t size;
+};
 
 
 
@@ -45,6 +66,44 @@ size_t current_page = 0;
  * The number of pages.
  */
 size_t page_count = 0;
+
+/**
+ * All loaded pages. Refer to `page_count`
+ * for the number of contained pages.
+ */
+struct page *pages;
+
+
+
+/**
+ * Displays the current pages.
+ * This function will not clear the screen.
+ * 
+ * @param   bar   Print progress bar?
+ * @param   page  Print page number and page count?
+ * @return        0 on success, -1 on error.
+ */
+static int display_page(int bar, int page)
+{
+	ssize_t wrote;
+	struct page p;
+
+	p = pages[current_page];
+	while (p.size) {
+		wrote = write(STDOUT_FILENO, p.content, p.size);
+		if (wrote < 0) {
+			if (errno == EINTR)
+				continue;
+			return -1;
+		}
+		p.content += wrote;
+		p.size -= (size_t)wrote;
+	}
+
+	/* TODO */ (void) bar, (void) page;
+
+	return 0;
+}
 
 
 
@@ -75,8 +134,8 @@ size_t page_count = 0;
 int main(int argc, char *argv[])
 {
 	int dashed = 0, f_empty = 0, f_bar = 0, f_page = 0;
-	char* arg;
-	const char* file = NULL;
+	char *arg;
+	const char *file = NULL;
 	int fd = -1, tty_configured = 0;
 	struct termios stty;
 	struct termios saved_stty;
@@ -84,8 +143,7 @@ int main(int argc, char *argv[])
 
 	/* Check that we have a stdout. */
 	if (fstat(STDOUT_FILENO, &_attr))
-		if (errno == EBADF)
-			goto fail;
+		t (errno == EBADF);
 
 	/* Parse arguments. */
 	argv0 = argv ? (argc--, *argv++) : "pp";
@@ -120,8 +178,7 @@ int main(int argc, char *argv[])
 		fd = STDIN_FILENO;
 	} else {
 		fd = open(file, O_RDONLY);
-		if (fd == -1)
-			goto fail;
+		t (fd == -1);
 	}
 
 	/* TOOD Load pages. */
@@ -134,18 +191,17 @@ int main(int argc, char *argv[])
 		goto print_current_page;
 
 	/* Configure terminal. */
-	fprintf(stdout, "\033[?1049h\033[?25l");
-	fflush(stdout);
-	tcgetattr(STDIN_FILENO, &stty);
+	t (fprintf(stdout, "\033[?1049h\033[?25l") < 0);
+	t (fflush(stdout));
+	t (tcgetattr(STDIN_FILENO, &stty));
 	saved_stty = stty;
 	stty.c_lflag &= (tcflag_t)~(ICANON | ECHO | ISIG);
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &stty);
+	t (tcsetattr(STDIN_FILENO, TCSAFLUSH, &stty));
 	tty_configured = 1;
 
-	/* Get a readable filedescriptor for the controlling terminal. */
+	/* Get a readable file descriptor for the controlling terminal. */
 	fd = open("/dev/tty", O_RDONLY);
-	if (fd == -1)
-		goto fail;
+	t (fd == -1);
 
 	/* TODO Display file. */
 
@@ -162,8 +218,12 @@ print_current_page:
 	if (page_count == 0)
 		return 0;
 
-	/* TODO Print current page. */
+	/* Print current page. */
+	t (display_page(0, 0));
 
+	while (page_count--)
+		free(pages[page_count].content);
+	free(pages);
 	return 0;
 
 fail:
@@ -175,6 +235,9 @@ fail:
 		fprintf(stdout, "\033[?25h\033[?1049l");
 		fflush(stdout);
 	}
+	while (page_count--)
+		free(pages[page_count].content);
+	free(pages);
 	return 1;
 
 usage:
