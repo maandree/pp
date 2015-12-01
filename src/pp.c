@@ -198,15 +198,15 @@ static int display_file(int fd, int bar, int page)
 {
 	ssize_t n;
 	char c;
-	int state = 0;
-	int command = 0;
+	int state;
+	int command;
 
 next:
 	t (fprintf(stdout, "\033[H\033[2J") < 0);
 	t (fflush(stdout));
 	t (display_page(bar, page));
 
-	for (command = 99; command == 99;) {
+	for (command = 99, state = 0; command == 99;) {
 		n = read(fd, &c, sizeof(c));
 		if (n == 0) {
 			return 0;
