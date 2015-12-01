@@ -472,6 +472,8 @@ print_current_page:
 
 	/* Print current page. */
 	t (display_page(0, 0));
+	fprintf(stdout, "\n");
+	fflush(stdout);
 
 	while (page_count--)
 		free(pages[page_count].content);
