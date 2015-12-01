@@ -218,9 +218,9 @@ next:
 		if (state == 1) { /* ESC */
 			state = (c == '[' ? 2 : 0);
 		} else if (state == 2) { /* CSI */
-			if (strchr("AC", c)) /* up or right */
+			if (strchr("AD", c)) /* up or left */
 				command = -1;
-			else if (strchr("BD", c)) /* down or left */
+			else if (strchr("BC", c)) /* down or right */
 				command = +1;
 			else if (c == '5') /* CSI 5 */
 				state = 5;
@@ -249,8 +249,8 @@ next:
 	 * Page Up   = \e[5~
 	 * Page Down = \e[6~
 	 * 
-	 * Right = \e[C
 	 * Left  = \e[D
+	 * Right = \e[C
 	 */
 
 	if ((command == -1) && current_page) {
