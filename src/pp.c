@@ -440,31 +440,31 @@ int main(int argc, char *argv[])
 	if (page_count < 2)
 		goto print_current_page;
 
-	/* Configure terminal. */
-	t (fprintf(stdout, "\033[?1049h\033[?25l") < 0);
-	t (fflush(stdout));
-	t (tcgetattr(STDIN_FILENO, &stty));
-	saved_stty = stty;
-	stty.c_lflag &= (tcflag_t)~(ICANON | ECHO | ISIG);
-	t (tcsetattr(STDIN_FILENO, TCSAFLUSH, &stty));
-	tty_configured = 1;
-
 	/* Get a readable file descriptor for the controlling terminal. */
 	fd = open("/dev/tty", O_RDONLY);
 	t (fd == -1);
+
+	/* Configure terminal. */
+	t (fprintf(stdout, "\033[?1049h\033[?25l") < 0);
+	t (fflush(stdout));
+	t (tcgetattr(fd, &stty));
+	saved_stty = stty;
+	stty.c_lflag &= (tcflag_t)~(ICANON | ECHO | ISIG);
+	t (tcsetattr(fd, TCSAFLUSH, &stty));
+	tty_configured = 1;
 
 	/* Display file. */
 	signal(SIGWINCH, sigwinch);
 	t (display_file(fd, f_bar, f_page));
 
-	/* We do not need the input from the terminal anymore. */
-	close(fd), fd = -1;
-
 	/* Restore terminal configurations. */
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &saved_stty);
+	tcsetattr(fd, TCSAFLUSH, &saved_stty);
 	fprintf(stdout, "\033[?25h\033[?1049l");
 	fflush(stdout);
 	tty_configured = 0;
+
+	/* We do not need the input from the terminal anymore. */
+	close(fd), fd = -1;
 
 print_current_page:
 	if (page_count == 0)
