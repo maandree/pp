@@ -155,17 +155,17 @@ static int display_page(int bar, int page)
 
 	get_terminal_size();
 
-	t (snprintf(NULL, 0, "%zu (%zu)%zn", current_page, page_count, &n) < 0);
+	t (snprintf(NULL, 0, "%zu (%zu)%zn", current_page + 1, page_count, &n) < 0);
 	if (bar && current_page) {
 		t (fprintf(stdout, "\033[%zu;1H\033[0;7m\033[%zu@\033[27m",
 			   height, stop = current_page * width / (page_count - 1)) < 0);
 	} else if (page) {
 		t (fprintf(stdout, "\033[%zu;%zuH\033[0m%zu (%zu)",
-			   height, width - 1 - (size_t)n, current_page, page_count) < 0);
+			   height, width - 1 - (size_t)n, current_page + 1, page_count) < 0);
 	}
 	else if (bar && page && current_page) {
 		char buffer[2 * 3 * sizeof(size_t) + sizeof(" ()\033[27m")];
-		sprintf(buffer, "%zu (%zu)", current_page, page_count);
+		sprintf(buffer, "%zu (%zu)", current_page + 1, page_count);
 		if (width - 1 - (size_t)n < stop)
 			stop = 0;
 		else
