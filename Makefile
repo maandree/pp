@@ -115,12 +115,7 @@ install-cmd: bin/pp
 	install -m755 $< -- "$(DESTDIR)$(BINDIR)/$(COMMAND)"
 
 .PHONY: install-copyright
-install-copyright: install-copying install-license
-
-.PHONY: install-copying
-install-copying:
-	install -dm755 -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
-	install -m644 COPYING -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
+install-copyright: install-license
 
 .PHONY: install-license
 install-license:
@@ -178,7 +173,6 @@ install-zsh: bin/pp.zsh-completion
 .PHONY: uninstall
 uninstall:
 	-rm -- "$(DESTDIR)$(BINDIR)/$(COMMAND)"
-	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/COPYING"
 	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
 	-rmdir -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
 	-rm -- "$(DESTDIR)$(INFODIR)/$(PKGNAME).info"
