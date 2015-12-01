@@ -25,13 +25,26 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <termios.h>
+#include <sys/stat.h>
 
 
 
 /**
- * The name of the process
+ * The name of the process.
  */
 const char *argv0;
+
+/**
+ * The index (0-based) of the current page.
+ */
+size_t current_page = 0;
+
+/**
+ * The number of pages.
+ */
+size_t page_count = 0;
 
 
 
@@ -62,12 +75,20 @@ const char *argv0;
 int main(int argc, char *argv[])
 {
 	int dashed = 0, f_empty = 0, f_bar = 0, f_page = 0;
+	char* arg;
 	const char* file = NULL;
-	int fd = -1;
+	int fd = -1, tty_configured = 0;
+	struct termios stty;
+	struct termios saved_stty;
+	struct stat _attr;
 
-	argv0 = argv ? (argc--, *argv++) : "pp";
+	/* Check that we have a stdout. */
+	if (fstat(STDOUT_FILENO, &_attr))
+		if (errno == EBADF)
+			goto fail;
 
 	/* Parse arguments. */
+	argv0 = argv ? (argc--, *argv++) : "pp";
 	while (argc) {
 		if (!dashed && !strcmp(*argv, "--")) {
 			dashed = 1;
@@ -96,22 +117,64 @@ int main(int argc, char *argv[])
 
 	/* Open file. */
 	if (!file || !strcmp(file, "-")) {
-		fd = 0;
+		fd = STDIN_FILENO;
 	} else {
 		fd = open(file, O_RDONLY);
 		if (fd == -1)
 			goto fail;
 	}
 
-	/* TODO */
+	/* TOOD Load pages. */
 
-	close(fd);
+	/* We do not need the file anymore. */
+	close(fd), fd = -1;
+
+	/* No need to be interactive if there is just one page. */
+	if (page_count < 2)
+		goto print_current_page;
+
+	/* Configure terminal. */
+	fprintf(stdout, "\033[?1049h\033[?25l");
+	fflush(stdout);
+	tcgetattr(STDIN_FILENO, &stty);
+	saved_stty = stty;
+	stty.c_lflag &= (tcflag_t)~(ICANON | ECHO | ISIG);
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &stty);
+	tty_configured = 1;
+
+	/* Get a readable filedescriptor for the controlling terminal. */
+	fd = open("/dev/tty", O_RDONLY);
+	if (fd == -1)
+		goto fail;
+
+	/* TODO Display file. */
+
+	/* We do not need the input from the terminal anymore. */
+	close(fd), fd = -1;
+
+	/* Restore terminal configurations. */
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &saved_stty);
+	fprintf(stdout, "\033[?25h\033[?1049l");
+	fflush(stdout);
+	tty_configured = 0;
+
+print_current_page:
+	if (page_count == 0)
+		return 0;
+
+	/* TODO Print current page. */
+
 	return 0;
 
 fail:
 	perror(argv0);
 	if (fd >= 0)
 		close(fd);
+	if (tty_configured) {
+		tcsetattr(STDIN_FILENO, TCSAFLUSH, &saved_stty);
+		fprintf(stdout, "\033[?25h\033[?1049l");
+		fflush(stdout);
+	}
 	return 1;
 
 usage:
