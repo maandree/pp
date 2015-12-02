@@ -482,13 +482,13 @@ print_current_page:
 
 fail:
 	perror(argv0);
-	if (fd >= 0)
-		close(fd);
 	if (tty_configured) {
-		tcsetattr(STDIN_FILENO, TCSAFLUSH, &saved_stty);
+		tcsetattr(fd, TCSAFLUSH, &saved_stty);
 		fprintf(stdout, "\033[?25h\033[?1049l");
 		fflush(stdout);
 	}
+	if (fd >= 0)
+		close(fd);
 	while (page_count--)
 		free(pages[page_count].content);
 	free(pages);
